@@ -1,0 +1,10 @@
+package paq.Structures;
+
+public enum TT {
+    TK_ID, TK_INTV, TK_DECV, TK_DECT, TK_INTT, TK_STRT, TK_END, TK_READ, TK_PRNT,
+    TK_OBR, TK_CBR, TK_OPR, TK_CPR, TK_SMC, TK_CMA, TK_DOT, TK_EQU, TK_ADD, TK_SUB, TK_MUL, TK_DIV,
+    TK_$,
+    E, T, F,
+    PROGRAM, BODY, STATEMENT, DECLARE, ASIGN, TYPE, PRINT, READ
+
+}
