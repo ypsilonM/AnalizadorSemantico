@@ -9,24 +9,17 @@ public class Token {
     private int start;
     private TT tipo;
 
-    private boolean syntax;
-    private String error;
-
     public Token(){
         lexema = new StringBuilder();
         lineNumber = -1;
         start = -1;
         tipo = null;
-        syntax = false;
-        error = "";
     }
     public Token(TT tipo, String lexema){
         this.lexema = new StringBuilder(lexema);
         lineNumber = -1;
         start = -1;
         this.tipo = tipo;
-        syntax = false;
-        error = "";
     }
 
     public void setLine(int line){
@@ -46,6 +39,7 @@ public class Token {
     public void addChar(char c){
         this.lexema.append(c);
     }
+
     public String getLexeme(){
         return lexema.toString();
     }
@@ -64,26 +58,6 @@ public class Token {
                 lexema.toString().equals("\r");
     }
 
-    public void copyTo(Token token){
-        token.setStart(this.getStart());
-        token.setLine(this.getLine());
-    }
-
-    public boolean isSyntax() {
-        return syntax;
-    }
-
-    public void setSyntax(boolean syntax) {
-        this.syntax = syntax;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public String getError() {
-        return error;
-    }
 
     @Override
     public String toString() {

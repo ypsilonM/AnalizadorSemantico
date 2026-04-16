@@ -1,6 +1,8 @@
 package paq.Structures.Syntax;
 
 import paq.Principal;
+import paq.Structures.Error;
+import paq.Structures.ErrorType;
 import paq.Structures.Token;
 import paq.Structures.TT;
 
@@ -13,7 +15,7 @@ public class Parser {
     private int index = 0;
     private String temporalErrorMsg;
 
-    private List<Token> errores;
+    private List<Error> errors;
     private boolean huboError = false;
 
     private List<Nodo> arbol;
@@ -23,7 +25,7 @@ public class Parser {
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
         this.stack = new Stack<>();
-        this.errores = new ArrayList<>();
+        this.errors = new ArrayList<>();
         this.arbol = new LinkedList<>();
         counter = 1;
     }
@@ -38,10 +40,11 @@ public class Parser {
     private void apilarDeLista(Token token) {
         stack.push(token);
     }
+
     public void parse() {
 
         stack.clear();
-        errores.clear();
+        errors.clear();
         huboError = false;
         index = 0;
 
@@ -88,7 +91,7 @@ public class Parser {
             Principal.treeNodes.addAll(arbol);
         } else {
             System.out.println(" PROGRAMA CON ERRORES");
-            Principal.errorsTokenList.addAll(errores);
+            Principal.errorList.addAll(errors);
 
 
         }
@@ -121,9 +124,10 @@ public class Parser {
         String mensaje = "Error sintáctico en línea " + token.getLine() + ": token inesperado '" + token.getLexeme() + "'";
         System.out.println(mensaje);
 
-        token.setSyntax(true);
-        token.setError(temporalErrorMsg);
-        errores.add(token);
+        Error error = new Error(token);
+        error.setErrorType(ErrorType.SYNTAX);
+        error.setMessage(temporalErrorMsg);
+        errors.add(error);
     }
     private boolean puedeApilar(Token tokenDelante) {
         TT tipoTokenDelante = tokenDelante.getTipo();

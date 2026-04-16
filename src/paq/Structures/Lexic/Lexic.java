@@ -1,6 +1,8 @@
-package paq.Analizadores.Lexico;
+package paq.Structures.Lexic;
 
 import paq.Principal;
+import paq.Structures.Error;
+import paq.Structures.ErrorType;
 import paq.Structures.Semantic.Symbol;
 import paq.Structures.Token;
 import paq.Structures.TT;
@@ -10,7 +12,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Stack;
 
-public class AnalizadorLexico {
+public class Lexic {
 
     public static void execute(String codigo) {
 
@@ -92,7 +94,11 @@ public class AnalizadorLexico {
             if(tokenSend(token, Validador.isReservada(token.getLexeme()))) continue;
             if(tokenSend(token, Validador.isSimbolo(token.getLexeme()))) continue;
             if(tokenSend(token, Validador.isNumero(token.getLexeme()))) continue;
-            Principal.errorsTokenList.addLast(token);
+
+            Error error = new Error(token);
+            error.setErrorType(ErrorType.LEXIC);
+
+            Principal.errorList.addLast(error);
 
         }
     }

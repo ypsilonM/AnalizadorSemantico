@@ -1,6 +1,8 @@
 package paq;
 
-import paq.Analizadores.Lexico.AnalizadorLexico;
+import paq.Structures.Error;
+import paq.Structures.ErrorType;
+import paq.Structures.Lexic.Lexic;
 import paq.Structures.Semantic.Semantic;
 import paq.Structures.Semantic.Symbol;
 import paq.Structures.Syntax.Nodo;
@@ -19,12 +21,11 @@ import java.util.List;
 
 public class Principal extends JFrame {
 
-    public static LinkedList<Token> errorsTokenList = new LinkedList<>();
+    public static LinkedList<Error> errorList = new LinkedList<>();
     public static List<Token> validTokenList = new LinkedList<>();
 
     public static List<Symbol> symbolTable = new LinkedList<>();
     public static LinkedList<Nodo> treeNodes = new LinkedList<>();
-
 
 
     private JTextArea editorArea;
@@ -41,7 +42,7 @@ public class Principal extends JFrame {
 
 
     public Principal() {
-        setTitle("AnalizadorLexico Léxico");
+        setTitle("Lexic Léxico");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1400, 700);
         setLocationRelativeTo(null);
@@ -56,7 +57,7 @@ public class Principal extends JFrame {
         panelSintax.setBorder(BorderFactory.createTitledBorder("Árbol Sintáctico"));
         panelSintax.setPreferredSize(new Dimension(400, 700));
 
-        String[] columnasSintax = {"Numero", "Nodo", "Num Padre"};
+        String[] columnasSintax = {"Numero", "Nodo", "Num Padre", "Tipo"};
         modeloSintax = new DefaultTableModel(columnasSintax, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -260,18 +261,23 @@ public class Principal extends JFrame {
         String codigo = editorArea.getText();
         consoleArea.setText("");
         limpiarTablas();
-        AnalizadorLexico.execute(codigo);
+
+        Lexic.execute(codigo);
         new Parser(validTokenList).parse();
         Semantic.semanticAnalyze(treeNodes);
 
-        if(!errorsTokenList.isEmpty()){
-            for(Token tkn : errorsTokenList) {
-                String errorMsg =
-                        "Error "+ (tkn.isSyntax()?"sintáctico":"léxico")+
-                                " en la linea "+tkn.getLine()+":"+tkn.getStart()+" -> "+tkn.getLexeme()+" \n";
-                        if(tkn.isSyntax()){
-                            errorMsg+="\t"+tkn.getError()+"\n";
-                        }
+        if(!errorList.isEmpty()){
+            for(Error error : errorList) {
+                String errorMsg = "";
+                Token tkn = error.getToken();
+                if(error.getErrorType() == ErrorType.LEXIC)
+                    errorMsg = "Error LÉXICO en la línea "+tkn.getLine()+":"+tkn.getStart()+" -> "+tkn.getLexeme()+" \n";
+                if(error.getErrorType() == ErrorType.SYNTAX)
+                    errorMsg = "Error SINTÁCTICO en la línea "+tkn.getLine()+":"+tkn.getStart()+" -> "+tkn.getLexeme()+" \n"+
+                            "\t"+error.getMessage()+"\n";
+                if(error.getErrorType() == ErrorType.SEMANTIC)
+                    errorMsg = "Error SEMÁNTICO \n"+
+                            "\t"+error.getMessage()+"\n";
                 consoleArea.append(errorMsg);
             }
         }
@@ -302,7 +308,9 @@ public class Principal extends JFrame {
             modeloSintax.addRow(new Object[]{
                     nodo.getNumero(),
                     showValue? type+"("+nodo.getToken().getLexeme()+")": type,
-                    nodo.getPadre()});
+                    nodo.getPadre(),
+                    nodo.getType()
+            });
         }
 
         JViewport viewportTokens = (JViewport) tablaTokens.getParent();
@@ -332,7 +340,7 @@ public class Principal extends JFrame {
         modeloSimbolos.setRowCount(0);
         modeloSintax.setRowCount(0);
         validTokenList.clear();
-        errorsTokenList.clear();
+        errorList.clear();
         treeNodes.clear();
         symbolTable.clear();
     }

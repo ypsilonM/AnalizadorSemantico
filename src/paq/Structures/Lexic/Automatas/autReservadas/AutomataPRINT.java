@@ -1,10 +1,10 @@
-package paq.Analizadores.Lexico.Automatas.autReservadas;
+package paq.Structures.Lexic.Automatas.autReservadas;
 
 import paq.Structures.Lexic.Automata;
 import paq.Structures.Lexic.Estado;
 
-public class AutomataSTART extends Automata {
-    public AutomataSTART(){
+public class AutomataPRINT extends Automata {
+    public AutomataPRINT(){
 
         Estado inicial = new Estado(false);
         Estado estado1 = new Estado(false);
@@ -13,13 +13,11 @@ public class AutomataSTART extends Automata {
         Estado estado4 = new Estado(false);
         Estado estado5 = new Estado(true);
         super.setActual(inicial);
-        inicial.setWay('S',estado1);
-        estado1.setWay('T',estado2);
-        estado2.setWay('A',estado3);
-        estado3.setWay('R',estado4);
+        inicial.setWay('P',estado1);
+        estado1.setWay('R',estado2);
+        estado2.setWay('I',estado3);
+        estado3.setWay('N',estado4);
         estado4.setWay('T',estado5);
 
     }
 }
-
-

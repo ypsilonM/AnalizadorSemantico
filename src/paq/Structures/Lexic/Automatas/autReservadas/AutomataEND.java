@@ -1,4 +1,4 @@
-package paq.Analizadores.Lexico.Automatas.autReservadas;
+package paq.Structures.Lexic.Automatas.autReservadas;
 
 import paq.Structures.Lexic.Automata;
 import paq.Structures.Lexic.Estado;

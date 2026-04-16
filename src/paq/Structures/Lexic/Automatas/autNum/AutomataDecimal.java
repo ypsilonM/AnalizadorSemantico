@@ -1,4 +1,4 @@
-package paq.Analizadores.Lexico.Automatas.autNum;
+package paq.Structures.Lexic.Automatas.autNum;
 
 import paq.Structures.Lexic.Automata;
 import paq.Structures.Lexic.Estado;

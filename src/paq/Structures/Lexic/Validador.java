@@ -1,9 +1,9 @@
-package paq.Analizadores.Lexico;
+package paq.Structures.Lexic;
 
-import paq.Analizadores.Lexico.Automatas.autIdenti.AutomataVariable;
-import paq.Analizadores.Lexico.Automatas.autNum.AutomataDecimal;
-import paq.Analizadores.Lexico.Automatas.autNum.AutomataEntero;
-import paq.Analizadores.Lexico.Automatas.autReservadas.*;
+import paq.Structures.Lexic.Automatas.autIdenti.AutomataVariable;
+import paq.Structures.Lexic.Automatas.autNum.AutomataDecimal;
+import paq.Structures.Lexic.Automatas.autNum.AutomataEntero;
+import paq.Structures.Lexic.Automatas.autReservadas.*;
 import paq.Structures.TT;
 
 import java.util.Stack;

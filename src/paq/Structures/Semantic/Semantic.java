@@ -2,13 +2,19 @@ package paq.Structures.Semantic;
 
 import org.w3c.dom.Node;
 import paq.Principal;
+import paq.Structures.Error;
+import paq.Structures.ErrorType;
 import paq.Structures.Syntax.Nodo;
 import paq.Structures.TT;
+import paq.Structures.Token;
+
 import java.util.*;
 
 public class Semantic {
+
     private static ArrayList<TT> terminalList =
             new ArrayList<>(List.of(TT.TK_ID, TT.TK_DECV, TT.TK_INTV));
+
     private static ArrayList<TT> dontNeedToEvaluate =
             new ArrayList<>(List.of(
                     TT.TK_STRT, TT.TK_END, TT.TK_READ, TT.TK_PRNT,
@@ -31,22 +37,33 @@ public class Semantic {
             }
             if(isTerminal(node)){ // Terminal -> No children
                 if(idSymbol(node)){ // Symbol -> Search in table
+
                     int i = searchInSymbolTable(node);
                     Symbol symbol = Principal.symbolTable.get(i);
                     boolean symbolTypeDefined = symbol.getType()!=null;
+
                     if(typifier == null) {
                         if (symbolTypeDefined) {
                             node.setType(symbol.getType());
-                            //symbol.setType(symbol.getType());
                         } else {
                             node.setType(Type.ERROR);
-                            // < ERROR DE VARIABLE NO DECLARADA >
+
+                            Error error = new Error(node.getToken());
+                            error.setErrorType(ErrorType.SEMANTIC);
+                            error.setMessage(" VARIABLE NO DECLARADA ");
+                            Principal.errorList.addLast(error);
+
                         }
                     }else{ //Hay typifier
                         if (symbolTypeDefined) {
                             if (isAsigned(node)) {
                                 node.setType(Type.ERROR);
-                                // < ERROR DE DOBLE DECLARACION >
+
+                                Error error = new Error(node.getToken());
+                                error.setErrorType(ErrorType.SEMANTIC);
+                                error.setMessage(" VARIABLE DOBLEMENTE DECLARADA ");
+                                Principal.errorList.addLast(error);
+
                             } else {
                                 node.setType(symbol.getType());
                             }
@@ -56,10 +73,16 @@ public class Semantic {
                                 symbol.setType(typifier);
                             } else {
                                 node.setType(Type.ERROR);
-                                // < ERROR DE VARIABLE NO DECLARADA >
+
+                                Error error = new Error(node.getToken());
+                                error.setErrorType(ErrorType.SEMANTIC);
+                                error.setMessage(" VARIABLE NO DECLARADA ");
+                                Principal.errorList.addLast(error);
+
                             }
                         }
                     }
+
                 }else { // Numeric Constant -> Auto-Asign Type
                     Type type = getEq(node.getToken().getTipo());
                     node.setType(type);
@@ -135,10 +158,16 @@ public class Semantic {
             }
 
             return getType(typeSet);
+
         }else{
             if(!typeSet.contains(Type.ERROR)) {
-                System.out.println();
+                //AQUI ES DONDE VAS A LLAMAR AL MENSAJE DEL ERROR RECONSTRUIDO (EXPRESION)
                 // < ERROR DE INCOMPATIBILIDAD DE TIPOS >
+                Nodo nodoError = Principal.treeNodes.get(idPadre-1);
+                Error error = new Error();
+                error.setErrorType(ErrorType.SEMANTIC);
+                error.setMessage(reconstructMessage(nodoError));
+                Principal.errorList.addLast(error);
             }
             return Type.ERROR;
         }
@@ -151,6 +180,70 @@ public class Semantic {
         }
         return -1;
     }
+
+
+    public static String reconstructMessage(Nodo nodoError){
+
+        Token start = getLeftSide(nodoError);
+        Token end = getRightSide(nodoError);
+
+        StringBuilder msg = new StringBuilder(
+                "INCOMPATIBILIDAD DE TIPOS en la linea " + start.getLine() + " [" + start.getStart() + " : " + end.getStart() + "]" + "\n \t");
+
+        int leftIndex = 0;
+        for (int i=0;i<Principal.validTokenList.size();i++){
+            Token tmp = Principal.validTokenList.get(i);
+            if(tmp.getLexeme().equals(start.getLexeme()) && tmp.getStart()==start.getStart()) {
+                leftIndex = i;
+                break;
+            }
+        }
+
+        int rightIndex = 0;
+        for (int i=0;i<Principal.validTokenList.size();i++){
+            Token tmp = Principal.validTokenList.get(i);
+            if(tmp.getLexeme().equals(end.getLexeme()) && tmp.getStart()==end.getStart()) {
+                rightIndex = i;
+                break;
+            }
+        }
+
+        for(int i=leftIndex; i<=rightIndex; i++){
+               msg.append(Principal.validTokenList.get(i).getLexeme());
+        }
+        return msg.toString();
+
+    }
+
+    public static Token getLeftSide(Nodo nodoError){
+        int nodoPadre = nodoError.getNumero();
+        while (true){
+            for (int i = nodoPadre - 1; i >= 0; i--) {
+                if(Principal.treeNodes.get(i).getPadre() == nodoPadre) {
+                    nodoPadre = Principal.treeNodes.get(i).getNumero();
+                    break;
+                }
+            }
+            if(isTerminal(Principal.treeNodes.get(nodoPadre-1)) || Principal.treeNodes.get(nodoPadre-1).getToken().getTipo() == TT.TK_OPR)
+                return Principal.treeNodes.get(nodoPadre-1).getToken();
+        }
+    }
+
+    public static Token getRightSide(Nodo nodoError){
+        int nodoPadre = nodoError.getNumero();
+        List<Nodo> hijos = new ArrayList<>();
+        while (true){
+            for (int i = nodoPadre - 1; i >= 0; i--) {
+                if(Principal.treeNodes.get(i).getPadre() == nodoPadre) {
+                    hijos.add(Principal.treeNodes.get(i));
+                }
+            }
+            nodoPadre = hijos.getLast().getNumero();
+            if(isTerminal(Principal.treeNodes.get(nodoPadre-1)) || Principal.treeNodes.get(nodoPadre-1).getToken().getTipo() == TT.TK_CPR)
+                return Principal.treeNodes.get(nodoPadre-1).getToken();
+        }
+    }
+
 
     public static Type getType(Set<Type> set){
         if(set.contains(Type.INTEGER))
